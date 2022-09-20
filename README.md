@@ -11,7 +11,7 @@ Simple idea. Just put the SQL migrations into your code.
 package main
 
 import (
-  "github.com/klyngen/mini-migrate",
+  "github.com/klyngen/mini-migrator",
   _ "github.com/mattn/go-sqlite3"
   "database/sql"
 )
