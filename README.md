@@ -3,6 +3,8 @@ Simple idea. Just put the SQL migrations into your code.
 
 ### Why is this better than exsiting solutions
 - No need to ship migration-files with your executable
+- No CLI tools
+- No extra pipelines executing migrations
 - Easy to extend
 
 ## Usage
