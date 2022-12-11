@@ -86,11 +86,11 @@ func (m *migrator) MigrateDatabase(migrations []Migration) error {
 			_, err := m.db.Exec(migrations[i].Script)
 
 			if err != nil {
-				m.driver.updateStatus(FAILED, i)
+				m.driver.updateStatus(FAILED, i+1)
 				log.Fatalf("Unable to write migration: %v", err)
 			}
 
-			err = m.driver.updateStatus(COMPLETE, i)
+			err = m.driver.updateStatus(COMPLETE, i+1)
 
 			if err != nil {
 				log.Printf("Migration complete but unable to update status: %v", err)

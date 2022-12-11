@@ -70,3 +70,46 @@ func TestMigrations_EnsureMigrationFailsWhenHashChanges(t *testing.T) {
 	}
 
 }
+
+func TestMigrations_EnsureStatuses_AreSetCorrectly(t *testing.T) {
+
+	db := getDatabaseContext()
+	defer removeDatabase()
+	migrations := []migrator.Migration{{
+		Name:        "test1",
+		Description: "must see that this tooling works",
+		Script:      "CREATE TABLE TEST1 (id INTEGER, name VARHCAR(50))",
+	}, {
+		Name:        "test2",
+		Description: "this case is really important. This test is here to verify that a bug was solved",
+		Script:      "ALTER TABLE TEST1 ADD COLUMN description VARCHAR(256)",
+	}}
+
+	m, _ := migrator.NewMigrator(db, migrator.SQLiteDriver)
+
+	err := m.MigrateDatabase(migrations)
+
+	if err != nil {
+		t.Log("Migration should not return an error")
+		t.Fail()
+	}
+
+	rows, err := db.Query("SELECT status FROM migrationTable")
+
+	if err != nil {
+		t.Log("Fetching migrations should be successfull")
+		t.Fail()
+	}
+
+	var status int
+
+	for rows.Next() {
+		rows.Scan(&status)
+
+		if status != 3 {
+			t.Log("All rows should be successfull")
+			t.Fail()
+		}
+	}
+
+}
