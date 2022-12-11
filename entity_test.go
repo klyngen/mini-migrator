@@ -75,15 +75,23 @@ func TestMigrations_EnsureStatuses_AreSetCorrectly(t *testing.T) {
 
 	db := getDatabaseContext()
 	defer removeDatabase()
-	migrations := []migrator.Migration{{
-		Name:        "test1",
-		Description: "must see that this tooling works",
-		Script:      "CREATE TABLE TEST1 (id INTEGER, name VARHCAR(50))",
-	}, {
-		Name:        "test2",
-		Description: "this case is really important. This test is here to verify that a bug was solved",
-		Script:      "ALTER TABLE TEST1 ADD COLUMN description VARCHAR(256)",
-	}}
+	migrations := []migrator.Migration{
+		{
+			Name:        "test1",
+			Description: "must see that this tooling works",
+			Script:      "CREATE TABLE TEST1 (id INTEGER, name VARHCAR(50))",
+		},
+		{
+			Name:        "test2",
+			Description: "this case is really important. This test is here to verify that a bug was solved",
+			Script:      "ALTER TABLE TEST1 ADD COLUMN description VARCHAR(256)",
+		},
+		{
+			Name:        "test2",
+			Description: "this case is really important. This test is here to verify that a bug was solved",
+			Script:      "ALTER TABLE TEST1 ADD COLUMN description2 VARCHAR(256)",
+		},
+	}
 
 	m, _ := migrator.NewMigrator(db, migrator.SQLiteDriver)
 
@@ -110,6 +118,20 @@ func TestMigrations_EnsureStatuses_AreSetCorrectly(t *testing.T) {
 			t.Log("All rows should be successfull")
 			t.Fail()
 		}
+	}
+
+	m2, err := migrator.NewMigrator(db, migrator.SQLiteDriver)
+
+	if err != nil {
+		t.Log("Creating secondary migrator fails")
+		t.Fail()
+	}
+
+	err = m2.MigrateDatabase(migrations)
+
+	if err != nil {
+		t.Logf("Running migrations second time fails:\n %v", err.Error())
+		t.Fail()
 	}
 
 }

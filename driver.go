@@ -20,7 +20,7 @@ type RelationalDriver struct {
 	// `SELECT COUNT(name) FROM sqlite_master WHERE type='table' AND name=?`
 	ExsistanseQuery string
 	// FetchMigrationsQuery should get status, id and name fro mthe database
-	// `SELECT id, name, status FROM migrationTable`
+	// `SELECT id, name, status, hash FROM migrationTable`
 	FetchMigrationsQuery string
 	// WriteMigrationQuery inserts 5 values. id, timestamp, description, name, status
 	// `INSERT INTO migrationTable  (id, timestamp, description, name, status) VALUES(?, ?, ?, ?, ?)`
@@ -71,6 +71,7 @@ func (r *RelationalDriver) fetchMigrations() ([]Migration, error) {
 			Name:   name,
 			status: MigrationStatus(status),
 			order:  id,
+			hash:   hash,
 		})
 
 	}

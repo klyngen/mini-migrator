@@ -70,7 +70,7 @@ func (m *migrator) MigrateDatabase(migrations []Migration) error {
 		}
 
 		if migration.hash != migrations[i].createHash() {
-			return errors.New("Do not dare to migrate the database. Migration named %s has changed after migration was performed. Migration-script will not do anything. Either stop changing the migration script or update the database with a valid MD5-hash")
+			return errors.New(fmt.Sprintf("Do not dare to migrate the database. Migration named %s has changed after migration was performed. Migration-script will not do anything. Either stop changing the migration script or update the database with a valid MD5-hash", migrations[i].Name))
 		}
 	}
 
