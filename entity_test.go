@@ -31,7 +31,7 @@ func TestMigrations_MigrateDatabase(t *testing.T) {
 		Script:      "CREATE TABLE TEST1 (id INTEGER, name VARHCAR(50))",
 	}}
 
-	m, err := migrator.NewMigrator(db, migrator.SQLiteDriver)
+	m, err := migrator.NewMigrator(db, migrator.SQLiteDriver, migrator.MigrationOptions{Strict: true})
 
 	if err != nil {
 		t.Log("Could create migrator")
@@ -51,7 +51,7 @@ func TestMigrations_EnsureMigrationFailsWhenHashChanges(t *testing.T) {
 		Script:      "CREATE TABLE TEST1 (id INTEGER, name VARHCAR(50))",
 	}}
 
-	m, _ := migrator.NewMigrator(db, migrator.SQLiteDriver)
+	m, _ := migrator.NewMigrator(db, migrator.SQLiteDriver, migrator.MigrationOptions{Strict: true})
 
 	err := m.MigrateDatabase(migrations)
 
@@ -93,7 +93,7 @@ func TestMigrations_EnsureStatuses_AreSetCorrectly(t *testing.T) {
 		},
 	}
 
-	m, _ := migrator.NewMigrator(db, migrator.SQLiteDriver)
+	m, _ := migrator.NewMigrator(db, migrator.SQLiteDriver, migrator.MigrationOptions{Strict: true})
 
 	err := m.MigrateDatabase(migrations)
 
@@ -120,7 +120,7 @@ func TestMigrations_EnsureStatuses_AreSetCorrectly(t *testing.T) {
 		}
 	}
 
-	m2, err := migrator.NewMigrator(db, migrator.SQLiteDriver)
+	m2, err := migrator.NewMigrator(db, migrator.SQLiteDriver, migrator.MigrationOptions{Strict: true})
 
 	if err != nil {
 		t.Log("Creating secondary migrator fails")
@@ -134,4 +134,47 @@ func TestMigrations_EnsureStatuses_AreSetCorrectly(t *testing.T) {
 		t.Fail()
 	}
 
+}
+
+func TestMigrations_Non_Strict_Does_Not_Validate_Hashes(t *testing.T) {
+
+	db := getDatabaseContext()
+	defer removeDatabase()
+	migrations := []migrator.Migration{
+		{
+			Name:        "test1",
+			Description: "must see that this tooling works",
+			Script:      "CREATE TABLE TEST1 (id INTEGER, name VARHCAR(50))",
+		},
+		{
+			Name:        "test2",
+			Description: "this case is really important. This test is here to verify that a bug was solved",
+			Script:      "ALTER TABLE TEST1 ADD COLUMN description VARCHAR(256)",
+		},
+		{
+			Name:        "test2",
+			Description: "this case is really important. This test is here to verify that a bug was solved",
+			Script:      "ALTER TABLE TEST1 ADD COLUMN description2 VARCHAR(256)",
+		},
+	}
+
+	m, _ := migrator.NewMigrator(db, migrator.SQLiteDriver, migrator.MigrationOptions{})
+
+	err := m.MigrateDatabase(migrations)
+
+	if err != nil {
+		t.Log("Migration should not return an error")
+		t.Fail()
+	}
+
+	migrations[0].Name = "modified name"
+
+	m, _ = migrator.NewMigrator(db, migrator.SQLiteDriver, migrator.MigrationOptions{})
+
+	err = m.MigrateDatabase(migrations)
+
+	if err != nil {
+		t.Log("Migration should not return an error")
+		t.Fail()
+	}
 }
