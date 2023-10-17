@@ -87,14 +87,14 @@ func (m *migrator) MigrateDatabase(migrations []Migration) error {
 			migrations[i].order = i + 1
 			err = m.driver.writeMigration(migrations[i])
 			if err != nil {
-				log.Fatalf("Unable to write migration: %v", err)
+				log.Fatalf("Unable to write migration to migration table for number %v with name: %v due to error: %v", i+1, migrations[i].Name, err)
 			}
 
 			_, err := m.db.Exec(migrations[i].Script)
 
 			if err != nil {
 				m.driver.updateStatus(FAILED, i+1)
-				log.Fatalf("Unable to write migration: %v", err)
+				log.Fatalf("Unable to apply migration script for migration number %v, with name: %v due to error %v", i+1, migrations[i].Name, err)
 			}
 
 			err = m.driver.updateStatus(COMPLETE, i+1)
